@@ -1,0 +1,117 @@
+---
+Title: Baisc Twitter Bot
+author: Nipunjeet Gujral
+---
+
+```{r libraries}
+library(twitteR)
+library(dplyr)
+library(stringr)
+library(tm)
+```
+
+
+```{r authentication}
+consumer_key = "________"
+consumer_secret = "_____"
+access_token = "________"
+access_secret = "_______"
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+```
+
+
+```{r sorucing and cleaning text}
+source <- function(term, n){
+
+  tweets <- searchTwitter(searchString = term, n = n, lang = "en", resultType = "recent") %>% 
+    twListToDF()
+  
+  return(tweets)
+}
+```
+
+
+```{r time randomization}
+# choose a large interval from 1:sample_size,
+# from which a random interval will be choosen between min:max
+# depending on the divisional condition a random point will be choosen
+# that random point dictate the random difference in time during which no tweeting occurs 
+
+time <- function(sample_size, mod, remainder){
+  
+  min <- sample.int(n = sample_size, size = 1, replace = TRUE)
+  max <- sample.int(n = sample_size, size = 1, replace = TRUE)
+    
+  # addressing a possible switching of min and max
+  if (max <= min){
+    temp <- max
+    max <- min
+    min <- temp
+  }
+    
+  # conditonal mods for testing control
+  temp <- sample.int(n = c(min:max), size = 1, replace = FALSE)
+  
+  if (temp %/% mod == remainder){
+    sleep <- temp
+  } else if(temp %/% round(mod*2, digits = 0) == 0){
+    sleep <- temp + 1.5
+  } else if(temp %/% round(mod/3, digits = 0) == 0){
+    sleep <- temp + 1.2
+  } else{
+    sleep <- 63
+  }
+  
+  return(sleep)
+}
+```
+
+```{r tweeting}
+tweeting <- function(num_of_tweets){
+  for(num_tweets in 1:num_of_tweets){
+    # choose a tweet and do not repeat 
+    index <- sample.int(n = nrow(tweets), size = 1, replace = FALSE)
+    
+    # tweet that out to the public
+    tweet(tweets$text[index])
+    
+    # randomly sleep
+    sleep_time <- time(1000, 5, 2)
+    sleep_time
+    Sys.sleep(sleep_time)
+  }  
+}
+
+# choose topic
+  tweets <- source("_topic_", 100) 
+# send out 5 tweets
+  tweeting(5)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
